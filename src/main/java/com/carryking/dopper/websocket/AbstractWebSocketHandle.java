@@ -25,7 +25,6 @@ public abstract class AbstractWebSocketHandle implements WebSocketHandle{
     @Override
     public void onError(WebSocketChannel channel,Throwable ex) {
         ex.printStackTrace();
-        channel.close();
     }
 
 }

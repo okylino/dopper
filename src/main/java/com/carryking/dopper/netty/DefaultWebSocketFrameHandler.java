@@ -9,6 +9,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.socket.ChannelInputShutdownEvent;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -17,6 +18,8 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
@@ -68,6 +71,10 @@ public class DefaultWebSocketFrameHandler extends SimpleChannelInboundHandler<We
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 
+        if (evt instanceof ChannelInputShutdownEvent) {
+            log.info("远程主机关闭");
+        }
+
         //upgrade拦截 判断升级(身份校验?)是否成功
         boolean success = false;
         final WebSocketChannel webSocketChannel = WebSocketChannelFactory.newInstance(ctx.channel(), webSocketHandle);
@@ -116,6 +123,16 @@ public class DefaultWebSocketFrameHandler extends SimpleChannelInboundHandler<We
         WebSocketChannel webSocketChannel = WebSocketChannelFactory.newInstance(ctx.channel(), webSocketHandle);
         try {
             webSocketHandle.onError(webSocketChannel, cause);
+
+            //处理IOException 远程主机强迫关闭了一个现有的连接。
+            if (cause instanceof IOException) {
+                ctx.close().addListener(new GenericFutureListener<Future<? super Void>>() {
+                    @Override
+                    public void operationComplete(Future<? super Void> future) throws Exception {
+                        webSocketHandle.onClose(webSocketChannel,CloseEvent.PASSIVITY_CLOSE);
+                    }
+                });
+            }
 
             if (cause instanceof WebSocketHandshakeException) {
                 FullHttpResponse response = new DefaultFullHttpResponse(
