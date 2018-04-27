@@ -11,7 +11,7 @@ import org.springframework.core.io.Resource;
  * @Date: 2018/4/21 22:45
  * @Description: 加载Properties辅助类
  */
-public abstract class AbstractLoadProperties {
+public class LoadProperties {
 
     @Bean
     protected PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() {
@@ -22,7 +22,7 @@ public abstract class AbstractLoadProperties {
         }
 
         Resource[] resources = new Resource[properties.length];
-        for(int n=0;n<properties.length;n++) {
+        for (int n = 0; n < properties.length; n++) {
             resources[n] = new ClassPathResource(properties[n]);
         }
         propertyPlaceholderConfigurer.setLocations(resources);
@@ -31,7 +31,10 @@ public abstract class AbstractLoadProperties {
 
     /**
      * 返回需要加载的ClassPath下的properties文件列表
+     *
      * @return
      */
-    protected abstract String[] classPathProperties();
+    protected String[] classPathProperties() {
+        return null;
+    }
 }

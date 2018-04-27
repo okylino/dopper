@@ -63,7 +63,7 @@ public class WebSocketServerBootstrap {
 
             handle.onStarted(context);
 
-            log.info("WebSocket Server Started SUCCESS !! Bind on {}:{}{}", config.getHost(), config.getPort(), config.getUrl());
+            log.info("WebSocket Server Started SUCCESS !! Bind on {}://{}:{}{}",config.isEnableSSL() ? "wss":"ws", config.getHost(), config.getPort(), config.getUrl());
             future.channel().closeFuture().sync();
         } catch (Exception ex) {
             log.info("WebSocket Server Started Fail",ex);

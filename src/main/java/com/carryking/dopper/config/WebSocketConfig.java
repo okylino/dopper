@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
 /**
  * @Author: carryking
  * @Date: 2018/4/21 21:44
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WebSocketConfig {
+
+    private final static String PATH_SUFFIX = "/";
 
     /**
      * host
@@ -27,7 +31,7 @@ public class WebSocketConfig {
     /**
      * 是否启用SSL
      */
-    @Value("${server.enableSSL:false}")
+    @Value("${server.ssl.enable:false}")
     private boolean enableSSL;
 
     /**
@@ -41,6 +45,32 @@ public class WebSocketConfig {
      */
     @Value("${maxFrameSize:65536}")
     private int maxFrameSize;
+
+    /**
+     * 证书路径地址
+     */
+    @Value("${server.ssl.crt:}")
+    private String serverCrtPath;
+
+    /**
+     * PKCS8私钥地址
+     */
+    @Value("${server.ssl.pkcs8:}")
+    private String serverPKCS8Path;
+
+    @PostConstruct
+    private void init() {
+
+        if (StringUtils.isBlank(url)) {
+            url = PATH_SUFFIX;
+        }
+
+        if (PATH_SUFFIX.equals(StringUtils.right(url, 1))) {
+            url = StringUtils.right(url, url.length() - 1);
+        }
+
+        url = StringUtils.isBlank(url) ? "/" : url;
+    }
 
     public int getPort() {
         return port;
@@ -59,15 +89,6 @@ public class WebSocketConfig {
     }
 
     public String getUrl() {
-
-        if (StringUtils.isBlank(url)) {
-            return "";
-        }
-
-        if ("/".equals(StringUtils.right(url, 1))) {
-            url = StringUtils.right(url, url.length() - 1);
-        }
-
         return url;
     }
 
@@ -89,5 +110,34 @@ public class WebSocketConfig {
 
     public void setMaxFrameSize(int maxFrameSize) {
         this.maxFrameSize = maxFrameSize;
+    }
+
+    public String getServerCrtPath() {
+        return serverCrtPath;
+    }
+
+    public void setServerCrtPath(String serverCrtPath) {
+        this.serverCrtPath = serverCrtPath;
+    }
+
+    public String getServerPKCS8Path() {
+        return serverPKCS8Path;
+    }
+
+    public void setServerPKCS8Path(String serverPKCS8Path) {
+        this.serverPKCS8Path = serverPKCS8Path;
+    }
+
+    @Override
+    public String toString() {
+        return "WebSocketConfig{" +
+                "host='" + host + '\'' +
+                ", port=" + port +
+                ", enableSSL=" + enableSSL +
+                ", url='" + url + '\'' +
+                ", maxFrameSize=" + maxFrameSize +
+                ", serverCrtPath='" + serverCrtPath + '\'' +
+                ", serverPKCS8Path='" + serverPKCS8Path + '\'' +
+                '}';
     }
 }
